@@ -1,0 +1,87 @@
+---
+title: "RStudio Connect content runtime config"
+output: html_document
+---
+
+<details>
+<summary>Show code</summary>
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+library(httr)
+library(purrr)
+library(dplyr)
+library(DT)
+```
+
+Configuration items go here.
+
+If hosting this document on RStudio Connect you'll find that new versions set the environment variable `CONNECT_API_KEY` automatically. For older versions, you'll need to specify a valid key in the "Vars" tab for this document after it's been deployed.
+
+```{r config}
+api_key <- Sys.getenv("CONNECT_API_KEY")
+connect_url <- Sys.getenv("CONNECT_SERVER")
+```
+
+The `create_link()` function below uses the app GUID and an app title to construct valid HTML link code. When used in our table output later we'll be able to click on the link in the table to go straight to the relevant app. This should make it easier for end users to see an app they want to reconfigure and click the link to go straight there.
+
+```{r helper_funcs}
+## Content links for the output table
+create_link <- function(app_guid, display_title){
+  content_link <- paste0("<a href=\"",
+                        connect_url,
+                        "/connect/#/apps/",
+                        app_guid,
+                        "/runtime\" target=\"_blank\">",
+                        display_title,
+                        "</a>")
+  content_link
+}
+```
+
+Use our configuration elements above to hit the relevant API endpoint.
+
+If the API does not return a HTTP `200` response, we throw an error.
+
+```{r check_api}
+## List all content items
+## https://docs.rstudio.com/connect/api/#get-/v1/content
+
+result <- GET(paste0(connect_url, "/__api__/v1/content"),
+              add_headers(Authorization = paste("Key", api_key)))
+
+if (result$status_code != 200){
+  stop(paste("API request returned status:", result$status_code))
+}
+
+all_content <- content(result)
+```
+
+For output, we strip all of the content types that contain the word "static". This includes Rmarkdown, Jupyter notebook output etc. These output types do not have a "runtime" configuration.
+
+Content can have an optional "title", but "name" is mandatory. For our output, we use "title" unless it is `NA`, in which case we fall back to the "name" value.
+
+Finally, we use a custom function to create a column that contains a HTML link to the content in question for end user convenience, before selecting the required columns.
+
+```{r format_table}
+runtime_table <- map_dfr(all_content, unlist, .id = NULL) |> 
+  filter(!grepl("static", app_mode)) |> # Removes "static" content
+  mutate(display_title = coalesce(title, name)) |> 
+  mutate(content_url = create_link(guid, display_title)) |> 
+  select(content_url,
+         #guid,
+         #name,
+         #title,
+         max_processes,
+         min_processes,
+         max_conns_per_process,
+         load_factor) |> 
+  arrange(desc(as.numeric(max_processes))) |> 
+  datatable(escape = FALSE, options = list(pageLength = 20))
+```
+
+</details>
+
+```{r display_table, echo=FALSE}
+runtime_table
+```
