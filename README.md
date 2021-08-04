@@ -7,3 +7,7 @@ A short report that uses the RStudio Connect API to display a table of runtime c
 ## Usage
 
 Review the `config` block near the top of the document and then deploy to RStudio Connect with the correct environment variables if necessary.
+
+## License
+
+MIT © RStudio, PBC. (See [license file](LICENSE.md) for more info.)
