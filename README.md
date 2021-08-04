@@ -1,6 +1,6 @@
 # RSC runtime config report
 
-A short report that uses the RStudio Connect API to display a table of runtime configuration settings for each piece of deployed content.
+A short report that uses the [RStudio Connect API](https://docs.rstudio.com/connect/api/#get-/v1/content) to display a table of runtime configuration settings for each piece of deployed content.
 
 ![](images/runtime_config_report.png)
 
