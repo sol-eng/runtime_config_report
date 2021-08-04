@@ -75,8 +75,8 @@ runtime_table <- map_dfr(all_content, unlist, .id = NULL) %>%
          max_processes,
          min_processes,
          max_conns_per_process,
-         load_factor) |> 
-  arrange(desc(as.numeric(max_processes))) |> 
+         load_factor) %>% 
+  arrange(desc(as.numeric(max_processes))) %>%
   datatable(escape = FALSE, options = list(pageLength = 20))
 ```
 
