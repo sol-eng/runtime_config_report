@@ -64,10 +64,10 @@ Content can have an optional "title", but "name" is mandatory. For our output, w
 Finally, we use a custom function to create a column that contains a HTML link to the content in question for end user convenience, before selecting the required columns.
 
 ```{r format_table}
-runtime_table <- map_dfr(all_content, unlist, .id = NULL) |> 
-  filter(!grepl("static", app_mode)) |> # Removes "static" content
-  mutate(display_title = coalesce(title, name)) |> 
-  mutate(content_url = create_link(guid, display_title)) |> 
+runtime_table <- map_dfr(all_content, unlist, .id = NULL) %>% 
+  filter(!grepl("static", app_mode)) %>% # Removes "static" content
+  mutate(display_title = coalesce(title, name)) %>% 
+  mutate(content_url = create_link(guid, display_title)) %>% 
   select(content_url,
          #guid,
          #name,
